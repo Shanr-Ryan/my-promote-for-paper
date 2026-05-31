@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的 Claude 提示词库</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a1a;
+    --ink-light: #555;
+    --ink-faint: #999;
+    --rule: #e8e4de;
+    --bg: #faf9f7;
+    --card: #ffffff;
+    --accent: #2c5f8a;
+    --accent-light: #eef3f8;
+    --tag-bg: #f0ede8;
+    --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--rule);
+    background: #fff;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    gap: 1.5rem;
+  }
+
+  .site-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .site-title span {
+    color: var(--accent);
+  }
+
+  /* Search */
+  .search-wrap {
+    flex: 1;
+    max-width: 360px;
+    position: relative;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+
+  #search {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #search:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+
+  .count {
+    font-size: 13px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  /* Hero */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem 2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+
+  .hero p {
+    color: var(--ink-light);
+    font-size: 15px;
+    max-width: 540px;
+  }
+
+  /* Filter tags */
+  .filters {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .filter-label {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-right: 0.25rem;
+  }
+
+  .tag {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: var(--tag-bg);
+    color: var(--ink-light);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    font-weight: 400;
+  }
+
+  .tag:hover { border-color: var(--accent); color: var(--accent); }
+  .tag.active { background: var(--accent); color: #fff; }
+
+  /* Grid */
+  .grid {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 1.25rem;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .card-index {
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+
+  .card h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  .card-body {
+    font-size: 13.5px;
+    color: var(--ink-light);
+    line-height: 1.75;
+    white-space: pre-wrap;
+    border-left: 2px solid var(--accent-light);
+    padding-left: 0.875rem;
+    flex: 1;
+  }
+
+  .card-body mark {
+    background: #fff3cd;
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .card-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: #2e7d32; color: #2e7d32; }
+
+  /* Empty state */
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--ink-faint);
+  }
+
+  .empty svg { margin-bottom: 1rem; opacity: 0.3; }
+  .empty p { font-size: 15px; }
+
+  /* Footer */
+  footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.4rem; }
+    .grid { grid-template-columns: 1fr; padding: 1rem; }
+    .header-inner { gap: 0.75rem; }
+    .site-title { font-size: 0.95rem; }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="site-title">我的 <span>Claude</span> 提示词库</div>
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input id="search" type="text" placeholder="搜索提示词…" autocomplete="off">
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-label">Prompt Library · 学术研究版</div>
+  <h1>精选 Claude 提示词</h1>
+  <p>为法学研究与学术写作场景整理的提示词集合，可直接复制使用或按需修改。</p>
+</section>
+
+<div class="filters">
+  <span class="filter-label">分类：</span>
+  <button class="tag active" data-filter="all">全部</button>
+  <button class="tag" data-filter="文献">文献研究</button>
+  <button class="tag" data-filter="写作">学术写作</button>
+  <button class="tag" data-filter="分析">比较分析</button>
+  <button class="tag" data-filter="法律">法律文书</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <span>Shanr-Ryan · Claude 提示词库</span>
+  <span>持续更新中</span>
+</footer>
+
+<script>
+const prompts = [
+  {
+    title: "文献摘要",
+    category: "文献",
+    body: `请用学术语言总结以下文献，重点提炼：
+研究问题、研究方法、核心论点、局限性。
+
+文献内容：[粘贴文献]`
+  },
+  {
+    title: "多文件比较分析",
+    category: "分析",
+    body: `请从以下维度逐一比较这几份文件：
+适用范围、核心规则、例外情形、法律后果。
+
+文件内容：[粘贴文件]`
+  },
+  {
+    title: "论文写作辅助",
+    category: "写作",
+    body: `请帮我完善以下段落，保持学术语言风格，
+逻辑要严密，并指出论证中的薄弱之处。
+
+段落内容：[粘贴段落]`
+  },
+  {
+    title: "反驳论点生成",
+    category: "写作",
+    body: `请针对以下观点，列出最有力的三个反驳角度，
+并说明每个反驳的逻辑依据。
+
+观点：[填写观点]`
+  },
+  {
+    title: "跨法域比较研究",
+    category: "分析",
+    body: `请比较中国、美国、欧盟在以下法律议题上的
+核心规则差异，并分析背后的立法逻辑。
+
+议题：[填写议题]`
+  },
+  {
+    title: "裁判文书摘要",
+    category: "法律",
+    body: `请提取以下裁判文书的关键信息：
+案件类型、争议焦点、裁判理由、最终结论。
+
+文书内容：[粘贴文书]`
+  }
+];
+
+let currentFilter = "all";
+let currentSearch = "";
+
+function highlight(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(escaped, 'gi'), m => `<mark>${m}</mark>`);
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  const q = currentSearch.trim().toLowerCase();
+
+  const filtered = prompts.filter(p => {
+    const matchFilter = currentFilter === 'all' || p.category === currentFilter;
+    const matchSearch = !q || p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q);
+    return matchFilter && matchSearch;
+  });
+
+  document.getElementById('count').textContent = `${filtered.length} 条`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <p>没有找到匹配的提示词</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((p, i) => `
+    <div class="card" style="animation-delay:${i * 0.05}s">
+      <div class="card-header">
+        <h2>${highlight(p.title, currentSearch)}</h2>
+        <span class="card-index">NO.${String(prompts.indexOf(p) + 1).padStart(2,'0')}</span>
+      </div>
+      <div class="card-body">${highlight(p.body, currentSearch)}</div>
+      <div class="card-footer">
+        <span class="card-tag">${p.category}</span>
+        <button class="copy-btn" onclick="copyPrompt(this, ${prompts.indexOf(p)})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+          </svg>
+          复制
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copyPrompt(btn, index) {
+  navigator.clipboard.writeText(prompts[index].body).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 已复制`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> 复制`;
+    }, 2000);
+  });
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  render();
+});
+
+document.querySelectorAll('.tag').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
